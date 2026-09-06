@@ -17,8 +17,10 @@ import {
 	Menu,
 	MessageCircle,
 	MoreHorizontal,
+	Pause,
 	Paperclip,
 	PanelRight,
+	Play,
 	Search,
 	Send,
 	Settings,
@@ -152,6 +154,12 @@ function App() {
 		setSettings((current) => ({ ...current, ...patch }));
 	}
 
+	function toggleAutorun() {
+		const nextEnabled = !settings.enabled;
+		updateSettings({ enabled: nextEnabled });
+		setToast(nextEnabled ? "Auto-run started" : "Auto-run paused");
+	}
+
 	function selectConversation(id: string) {
 		setActiveId(id);
 		setMobilePanel("conversation");
@@ -278,7 +286,19 @@ function App() {
 							<span className="eyebrow">Workspace</span>
 							<h1>Inbox</h1>
 						</div>
-						<button className="icon-button" type="button" aria-label="Notifications"><Bell size={18} /></button>
+						<div className="header-actions">
+							<button
+								type="button"
+								className={`autorun-button ${settings.enabled ? "is-running" : ""}`}
+								onClick={toggleAutorun}
+								aria-pressed={settings.enabled}
+								aria-label={settings.enabled ? "Pause Auto-run" : "Start Auto-run"}
+							>
+								<span className="autorun-icon">{settings.enabled ? <Pause size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" />}</span>
+								<span><strong>Auto-run</strong><small>{settings.enabled ? "Running" : "Paused"}</small></span>
+							</button>
+							<button className="icon-button" type="button" aria-label="Notifications"><Bell size={18} /></button>
+						</div>
 					</div>
 					<div className="search-box">
 						<Search size={16} />
