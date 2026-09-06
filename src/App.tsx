@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
 	Archive,
 	ArrowLeft,
@@ -47,6 +47,67 @@ import {
 type View = "inbox" | "assigned" | "resolved" | "controls";
 type MobilePanel = "list" | "conversation" | "details" | "controls";
 type InboxFilter = "all" | "unread" | "human" | "ai";
+
+interface DemoIncomingMessage {
+	name: string;
+	initials: string;
+	channel: Channel;
+	message: string;
+	reply: string;
+	confidence: number;
+	topic: string;
+	location: string;
+	sentiment: Conversation["sentiment"];
+	humanOnly?: boolean;
+}
+
+const demoMessageFeed: DemoIncomingMessage[] = [
+	{
+		name: "Maya Patel",
+		initials: "MP",
+		channel: "web",
+		message: "Hi, what time does customer support open tomorrow?",
+		reply: "Hi Maya! Customer support opens at 9:00 AM tomorrow. Is there anything else I can help you with?",
+		confidence: 96,
+		topic: "Business hours",
+		location: "Chicago, IL",
+		sentiment: "neutral",
+	},
+	{
+		name: "Ethan Brooks",
+		initials: "EB",
+		channel: "instagram",
+		message: "Does the canvas backpack come in black?",
+		reply: "Hi Ethan! The canvas backpack is available in black. I can share the product link if you’d like.",
+		confidence: 91,
+		topic: "Product question",
+		location: "Denver, CO",
+		sentiment: "positive",
+	},
+	{
+		name: "Sofia Martinez",
+		initials: "SM",
+		channel: "email",
+		message: "Can you recommend a gift under $75?",
+		reply: "Hi Sofia! I’d be happy to help. A few popular gifts fit that budget; would you prefer clothing, accessories, or home items?",
+		confidence: 79,
+		topic: "Product recommendation",
+		location: "Miami, FL",
+		sentiment: "positive",
+	},
+	{
+		name: "Daniel Kim",
+		initials: "DK",
+		channel: "whatsapp",
+		message: "I was charged twice and need the extra payment refunded.",
+		reply: "I’m sorry about the duplicate charge. I’m bringing in a billing specialist who can review and resolve it securely.",
+		confidence: 94,
+		topic: "Payment dispute",
+		location: "Seattle, WA",
+		sentiment: "negative",
+		humanOnly: true,
+	},
+];
 
 const channelIcons: Record<Channel, LucideIcon> = {
 	whatsapp: MessageCircle,
@@ -116,9 +177,12 @@ function App() {
 	});
 	const [aiRunning, setAiRunning] = useState(false);
 	const [toast, setToast] = useState<string | null>(null);
+	const demoFeedIndex = useRef(0);
+	const settingsRef = useRef(settings);
 
 	useEffect(() => {
 		localStorage.setItem("relay-reception-settings", JSON.stringify(settings));
+		settingsRef.current = settings;
 	}, [settings]);
 
 	useEffect(() => {
@@ -126,6 +190,65 @@ function App() {
 		const timeout = window.setTimeout(() => setToast(null), 2600);
 		return () => window.clearTimeout(timeout);
 	}, [toast]);
+
+	useEffect(() => {
+		if (!settings.enabled) return;
+
+		function deliverDemoMessage() {
+			const currentSettings = settingsRef.current;
+			let demo: DemoIncomingMessage | undefined;
+			for (let offset = 0; offset < demoMessageFeed.length; offset += 1) {
+				const candidate = demoMessageFeed[(demoFeedIndex.current + offset) % demoMessageFeed.length];
+				if (currentSettings.channels[candidate.channel]) {
+					demo = candidate;
+					demoFeedIndex.current += offset + 1;
+					break;
+				}
+			}
+			if (!demo) return;
+
+			const mustHandoff = Boolean(demo.humanOnly);
+			const shouldAutoReply = !mustHandoff && demo.confidence >= currentSettings.autoAnswerAt;
+			const shouldSuggest = !mustHandoff && !shouldAutoReply && demo.confidence >= currentSettings.suggestAt;
+			const status: Conversation["status"] = shouldAutoReply ? "ai" : shouldSuggest ? "waiting" : "human";
+			const id = `demo-${Date.now()}-${demoFeedIndex.current}`;
+			const messages: Conversation["messages"] = [
+				{ id: `${id}-customer`, sender: "customer", body: demo.message, time: "Now" },
+			];
+			if (shouldAutoReply) {
+				messages.push({ id: `${id}-ai`, sender: "ai", body: demo.reply, time: "Now" });
+			}
+
+			const conversation: Conversation = {
+				id,
+				name: demo.name,
+				initials: demo.initials,
+				channel: demo.channel,
+				preview: demo.message,
+				time: "Now",
+				unread: 1,
+				status,
+				confidence: demo.confidence,
+				topic: demo.topic,
+				location: demo.location,
+				customerSince: "New lead",
+				orders: 0,
+				sentiment: demo.sentiment,
+				messages,
+				suggestedReply: shouldAutoReply ? undefined : demo.reply,
+			};
+
+			setConversations((current) => [conversation, ...current].slice(0, 20));
+			setToast(shouldAutoReply ? `New demo message · AI replied to ${demo.name}` : mustHandoff ? `New demo message · ${demo.name} needs you` : `New demo message · Suggestion ready for ${demo.name}`);
+		}
+
+		const firstMessage = window.setTimeout(deliverDemoMessage, 2500);
+		const messageInterval = window.setInterval(deliverDemoMessage, 10000);
+		return () => {
+			window.clearTimeout(firstMessage);
+			window.clearInterval(messageInterval);
+		};
+	}, [settings.enabled]);
 
 	const active = conversations.find((conversation) => conversation.id === activeId) ?? conversations[0];
 	const filteredConversations = useMemo(() => {
@@ -314,11 +437,12 @@ function App() {
 					</div>
 				</header>
 
-				<div className="conversation-scroll">
-					<div className="list-summary">
-						<span>{filteredConversations.length} conversations</span>
-						<button type="button">Newest <ChevronDown size={13} /></button>
-					</div>
+					<div className="conversation-scroll">
+						<div className="list-summary">
+							<span>{filteredConversations.length} conversations</span>
+							{settings.enabled && <span className="feed-live"><span /> Demo feed live</span>}
+							<button type="button">Newest <ChevronDown size={13} /></button>
+						</div>
 					{filteredConversations.map((conversation) => (
 						<button
 							type="button"
@@ -338,6 +462,7 @@ function App() {
 								<p>{conversation.preview}</p>
 								<div className="conversation-meta">
 									<ConfidencePill score={conversation.confidence} />
+									{conversation.id.startsWith("demo-") && <span className="demo-tag">Demo</span>}
 									<span className={`status-label status-${conversation.status}`}>
 										{conversation.status === "ai" ? "AI handled" : conversation.status === "human" ? "Needs you" : conversation.status === "resolved" ? "Resolved" : "Suggestion"}
 									</span>
@@ -374,7 +499,7 @@ function App() {
 						<div><strong>AI reception is {settings.enabled ? "active" : "paused"}</strong><span>Confidence for this conversation</span></div>
 						<ConfidencePill score={active.confidence} />
 						<span className="route-copy">
-							{active.confidence >= settings.autoAnswerAt && active.status !== "human" ? "Auto-answer allowed" : active.confidence >= settings.suggestAt ? "Human review suggested" : "Human handoff required"}
+							{!settings.enabled ? "Waiting for Auto-run" : active.confidence >= settings.autoAnswerAt && active.status !== "human" ? "Auto-answer allowed" : active.confidence >= settings.suggestAt ? "Human review suggested" : "Human handoff required"}
 						</span>
 					</div>
 

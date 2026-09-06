@@ -8,6 +8,8 @@ The current repository contains a polished working prototype, a Cloudflare Worke
 
 The inbox includes channel and status filters, conversation search, unread counts, customer context, AI summaries, suggested replies, manual takeover, resolution, and an adaptive reply composer. The control center persists settings in the browser and exposes every material AI policy as a dashboard control. The Worker endpoint at `POST /api/ai/reply` supports structured AI output with a safe deterministic fallback.
 
+In the public static demo, enabling **Auto-run** starts a clearly labeled demo feed: a new sample customer conversation arrives after a short delay and then every ten seconds. High-confidence questions receive an automatic AI reply, medium-confidence requests get a suggested reply, and payment or refund requests are handed to a person. Real customer messages require the production channel integrations listed below.
+
 ### Confidence policy
 
 | AI confidence and policy state | Result |
