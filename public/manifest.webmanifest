@@ -2,7 +2,8 @@
 	"name": "Relay Omnichannel Inbox",
 	"short_name": "Relay Inbox",
 	"description": "An omnichannel team inbox with confidence-routed AI reception.",
-	"start_url": "/",
+	"start_url": "./",
+	"scope": "./",
 	"display": "standalone",
 	"background_color": "#171a27",
 	"theme_color": "#171a27",
@@ -10,13 +11,13 @@
 	"categories": ["business", "productivity", "communication"],
 	"icons": [
 		{
-			"src": "/app-icon-192.png",
+			"src": "app-icon-192.png",
 			"sizes": "192x192",
 			"type": "image/png",
 			"purpose": "any maskable"
 		},
 		{
-			"src": "/app-icon-512.png",
+			"src": "app-icon-512.png",
 			"sizes": "512x512",
 			"type": "image/png",
 			"purpose": "any maskable"

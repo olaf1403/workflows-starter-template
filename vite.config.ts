@@ -5,6 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { cloudflare } from "@cloudflare/vite-plugin";
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+	base: mode === "pages" ? "/workflows-starter-template/" : "/",
 	plugins: [react(), tailwindcss(), cloudflare()],
-});
+}));
