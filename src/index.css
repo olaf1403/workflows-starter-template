@@ -108,6 +108,7 @@ h1, h2, h3, p { margin: 0; }
 .conversation-scroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #d8dce4 transparent; }
 .list-summary { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 7px; color: #939aa8; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
 .list-summary button { border: 0; background: transparent; color: #8a91a0; display: flex; align-items: center; gap: 2px; font-size: 9px; text-transform: uppercase; cursor: pointer; }
+.feed-live { display: inline-flex; align-items: center; gap: 4px; color: #23805f; font-size: 8px; letter-spacing: .03em; white-space: nowrap; }.feed-live > span { width: 6px; height: 6px; border-radius: 50%; background: #2fba86; box-shadow: 0 0 0 3px rgba(47,186,134,.13); }
 .conversation-row { width: 100%; min-height: 98px; border: 0; border-left: 3px solid transparent; border-bottom: 1px solid #eceef2; padding: 13px 14px 12px 12px; background: transparent; color: inherit; text-align: left; display: flex; align-items: flex-start; gap: 11px; cursor: pointer; transition: background 160ms var(--ease-out), border-color 160ms var(--ease-out); }
 .conversation-row:hover { background: #f7f5ff; }
 .conversation-row.is-active { background: #f1edff; border-left-color: var(--violet); }
@@ -136,6 +137,7 @@ h1, h2, h3, p { margin: 0; }
 .confidence-medium { color: #9b6424; background: #fff1da; }.confidence-medium .confidence-dot { background: #eda642; }
 .confidence-low { color: #a9434c; background: #fde8ea; }.confidence-low .confidence-dot { background: #e3646e; }
 .status-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 8.5px; font-weight: 700; color: #8a91a0; }
+.demo-tag { height: 17px; display: inline-flex; align-items: center; border-radius: 5px; padding: 0 5px; color: #7355d4; background: #eee9ff; font-size: 7px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
 .status-human { color: #b34851; }.status-ai { color: #6151bd; }.status-resolved { color: #24755c; }
 .unread-badge { margin-left: auto; min-width: 17px; height: 17px; border-radius: 9px; display: grid; place-items: center; background: var(--violet); color: white; font-size: 8px; font-weight: 800; }
 .empty-state { display: flex; align-items: center; flex-direction: column; color: #a0a6b2; gap: 7px; padding: 60px 20px; text-align: center; }
