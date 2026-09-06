@@ -1,8 +1,8 @@
 {
-	"name": "workflows-starter-template",
-	"description": "Interactive starter template demonstrating Cloudflare Workflows with real-time status updates",
+	"name": "relay-omnichannel-inbox",
+	"description": "Responsive omnichannel inbox with confidence-routed AI reception",
 	"cloudflare": {
-		"label": "Workflows Starter",
+		"label": "Relay Omnichannel Inbox",
 		"products": [
 			"Workers",
 			"Workflows",
@@ -17,6 +17,7 @@
 		"docs_url": "https://developers.cloudflare.com/workflows/"
 	},
 	"dependencies": {
+		"lucide-react": "^0.468.0",
 		"react": "19.2.1",
 		"react-dom": "19.2.1"
 	},

@@ -1,6 +1,7 @@
 // Export the Workflow and Durable Object classes
 export { MyWorkflow } from "./workflow";
 export { WorkflowStatusDO } from "./durable-object";
+import { createReceptionDecision, type AiEnvironment } from "./reception";
 
 /**
  * Main Worker fetch handler
@@ -12,10 +13,27 @@ export { WorkflowStatusDO } from "./durable-object";
  * - GET /ws - WebSocket connection for real-time updates
  */
 export default {
-	async fetch(request: Request, env: Env): Promise<Response> {
-		const url = new URL(request.url);
+		async fetch(request: Request, env: Env): Promise<Response> {
+			const url = new URL(request.url);
 
-		// API: Start a new workflow instance
+			// API: Draft a safe reply and enforce deterministic confidence routing.
+			if (url.pathname === "/api/ai/reply" && request.method === "POST") {
+				try {
+					const body = await request.json();
+					const aiEnvironment = env as unknown as AiEnvironment;
+					const decision = await createReceptionDecision(body, aiEnvironment);
+					return Response.json(decision, {
+						headers: { "cache-control": "no-store" },
+					});
+				} catch (error) {
+					return Response.json(
+						{ error: error instanceof Error ? error.message : "Invalid reception request" },
+						{ status: 400 },
+					);
+				}
+			}
+
+			// API: Start a new workflow instance
 		if (url.pathname === "/api/workflow/start" && request.method === "POST") {
 			try {
 				const instance = await env.MY_WORKFLOW.create({
